@@ -1,50 +1,104 @@
-# Welcome to your Expo app 👋
+# Joy Radio
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Joy Radio is a design-forward online radio app built with Expo and React Native. It combines a minimal editorial-style interface with live station discovery, country browsing, and an in-app player experience.
 
-## Get started
+## Highlights
+
+- Full-screen mobile radio experience with custom intro, countries, stations, and player screens
+- Live radio discovery powered by the Radio Browser directory
+- Searchable country and station flows
+- Shared audio player context for playback and mini-player state
+- Custom typography and motion built around the app's visual system
+
+## Tech Stack
+
+- Expo
+- React Native
+- Expo Router
+- TypeScript
+- React Native Reanimated
+- Expo AV
+
+## API
+
+This app uses the [Radio Browser API](https://www.radio-browser.info/).
+
+Current base endpoint:
+
+```txt
+https://de1.api.radio-browser.info/json
+```
+
+Primary data used by the app includes:
+
+- `/countries`
+- `/stations`
+- `/stations/bycountrycodeexact/:code`
+
+## Project Structure
+
+```txt
+app/
+  index.tsx        Intro screen
+  countries.tsx    Country listing and search
+  stations.tsx     Station listing and search
+  player.tsx       Playback screen
+
+components/
+  radio-ui.tsx     Shared visual system and radio UI primitives
+
+lib/
+  radio.ts         Radio Browser API helpers
+  player-context.tsx
+```
+
+## Getting Started
 
 1. Install dependencies
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+2. Start the Expo dev server
 
-## Learn more
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+3. Run the app in your preferred environment
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- iOS simulator
+- Android emulator
+- Expo Go
+- Web
 
-## Join the community
+## Scripts
 
-Join our community of developers creating universal apps.
+```bash
+npm run start
+npm run ios
+npm run android
+npm run web
+npm run lint
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Design Credits
+
+Visual direction for this project was inspired by [Tamarashvili](https://dribbble.com/Tamarashvili) and the Dribbble shot [UI Exploration. Online Radio](https://dribbble.com/shots/24479926-UI-Exploration-Online-Radio).
+
+Thanks for the original exploration and inspiration behind the interface direction.
+
+## Legal
+
+- This project is an independent implementation and is not affiliated with or endorsed by Dribbble, Tamarashvili, or Radio Browser.
+- Station names, stream URLs, logos, and metadata are provided by third-party radio directory data sources through Radio Browser.
+- All trademarks, station brands, logos, and media rights belong to their respective owners.
+- This repository is intended for educational, experimental, and product-development purposes.
+- If you use this project commercially, review the licenses and terms of all third-party APIs, assets, fonts, and dependencies you rely on.
+
+## Notes
+
+- Radio availability and metadata quality depend on upstream Radio Browser data.
+- Some streams may be unavailable, geo-restricted, slow, or incorrectly tagged.
+- Playback behavior can vary by device, platform, and stream format.
