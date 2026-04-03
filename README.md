@@ -1,5 +1,9 @@
 # Joy Radio
 
+<p align="center">
+  <img src="./assets/logo.png" alt="Joy Radio logo" width="160" />
+</p>
+
 Joy Radio is a design-forward online radio app built with Expo and React Native. It combines a minimal editorial-style interface with live station discovery, country browsing, and an in-app player experience.
 
 ## Highlights
@@ -12,12 +16,12 @@ Joy Radio is a design-forward online radio app built with Expo and React Native.
 
 ## Tech Stack
 
-- Expo
-- React Native
-- Expo Router
-- TypeScript
-- React Native Reanimated
-- Expo AV
+![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
+![React Native](https://img.shields.io/badge/React%20Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Expo Router](https://img.shields.io/badge/Expo%20Router-1C1E24?style=for-the-badge&logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Reanimated](https://img.shields.io/badge/Reanimated-101418?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Expo AV](https://img.shields.io/badge/Expo%20AV-111827?style=for-the-badge&logo=expo&logoColor=white)
 
 ## API
 
