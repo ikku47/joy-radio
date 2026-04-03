@@ -41,11 +41,13 @@ export function Scale({
   withLabels = false,
   animated = false,
   value,
+  animateNeedleOnly = false,
 }: {
   height?: number;
   withLabels?: boolean;
   animated?: boolean;
   value?: number;
+  animateNeedleOnly?: boolean;
 }) {
   const marks = Array.from({ length: 121 }, (_, index) => index);
   const { staticWaveform } = usePlayer();
@@ -78,22 +80,24 @@ export function Scale({
   }, [animated, value]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    marginLeft: '50%',
     transform: [
-      { translateX: offset.value },
-      { translateX: (animated ? staticWaveform.value : 0) * 1.5 }
+      { translateX: animateNeedleOnly ? 0 : offset.value },
+      { translateX: animateNeedleOnly ? 0 : (animated ? staticWaveform.value : 0) * 1.5 }
     ],
   }));
 
   const needleStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: needlePos.value - 80 },
-    ],
+    transform: [{ translateX: animateNeedleOnly ? needlePos.value : needlePos.value - 80 }],
   }));
 
   return (
     <View style={[styles.scaleWrap, { height }]}>
-      <Animated.View style={[styles.scaleMarks, animated ? animatedStyle : null]}>
+      <Animated.View
+        style={[
+          animateNeedleOnly ? styles.scaleMarksFullWidth : styles.scaleMarks,
+          animated ? animatedStyle : null,
+          !animateNeedleOnly ? styles.scaleMarksCentered : null,
+        ]}>
         {marks.map((mark) => {
           const major = mark % 5 === 0;
           return <View key={mark} style={[styles.scaleMark, major ? styles.scaleMarkMajor : styles.scaleMarkMinor]} />;
@@ -270,6 +274,13 @@ export function VinylRecord({
 const styles = StyleSheet.create({
   scaleWrap: { justifyContent: 'center', backgroundColor: palette.shell },
   scaleMarks: { flexDirection: 'row', gap: 12, alignItems: 'flex-end' },
+  scaleMarksCentered: { marginLeft: '50%' },
+  scaleMarksFullWidth: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    width: '100%',
+  },
   scaleMark: { width: 1, backgroundColor: '#bebebe' },
   scaleMarkMajor: { height: 26 },
   scaleMarkMinor: { height: 15 },

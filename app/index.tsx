@@ -101,7 +101,7 @@ export default function IntroScreen() {
             })}
           </View>
 
-          <Scale height={58} animated />
+          <Scale height={58} animated animateNeedleOnly />
 
           <View style={styles.introBottom}>
             <View style={styles.verticalLines}>
