@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -10,26 +11,30 @@ import {
   View,
 } from 'react-native';
 
-import { palette, Scale, Capsule, IconCircle } from '@/components/radio-ui';
+import { Capsule, IconCircle, palette, Scale } from '@/components/radio-ui';
+import { usePlayer } from '@/lib/player-context';
 
 export default function PlayerScreen() {
   const router = useRouter();
-  const station = useLocalSearchParams<{ 
-    id: string, 
-    name: string, 
-    url: string, 
-    country: string, 
-    lang: string, 
-    tags: string, 
-    homepage: string 
+  const { currentStation, playing, loading, toggle } = usePlayer();
+  const params = useLocalSearchParams<{
+    id: string,
+    name: string,
+    url: string,
+    country: string,
+    lang: string,
+    tags: string,
+    homepage: string,
+    favicon: string
   }>();
 
   const [favorite, setFavorite] = useState(false);
-  const [playing, setPlaying] = useState(true);
+
+  const station = currentStation || params;
 
   // Derive a pseudo-frequency for design flavor
   const frequency = (92 + (parseInt(station.id?.slice(0, 4), 16) % 5.8 || 0)).toFixed(1);
-  
+
   const subLabel = station.homepage
     ? station.homepage.replace(/^https?:\/\//, '').replace(/\/$/, '')
     : station.name || 'Station Info';
@@ -44,26 +49,29 @@ export default function PlayerScreen() {
               <Pressable onPress={() => router.back()}>
                 <Feather name="chevron-left" size={34} color={palette.ink} />
               </Pressable>
-              <Capsule label={station.country || 'Malaga'} />
-            </View>
-
-            <View style={styles.playerModeRow}>
-              <Capsule label="FM" selected compact />
-              <Capsule label="AM" compact />
+              <Capsule label={station.country || 'Radio'} />
             </View>
           </View>
 
           <View style={styles.frequencyWrap}>
-            <Text style={styles.frequencyText}>
-              <Text style={styles.frequencyLead}>0</Text>
-              {frequency.slice(1)}
-            </Text>
+            {station.favicon ? (
+              <Image
+                source={{ uri: station.favicon }}
+                style={styles.stationLogo}
+                contentFit="contain"
+                transition={500}
+              />
+            ) : (
+              <View style={styles.logoFallback}>
+                <Feather name="mic" size={82} color={palette.ink} />
+              </View>
+            )}
             <Text numberOfLines={1} style={styles.stationCaption}>{subLabel}</Text>
           </View>
 
           <View style={styles.actionRow}>
             <Pressable onPress={() => setFavorite(f => !f)}>
-               <IconCircle icon="star" accent={favorite} />
+              <IconCircle icon="star" accent={favorite} />
             </Pressable>
             <IconCircle icon="share" />
           </View>
@@ -74,9 +82,9 @@ export default function PlayerScreen() {
           </View>
 
           <View style={styles.trackMeta}>
-            <Text style={styles.trackEyebrow}>{station.lang || station.tags?.split(',')[0] || 'Radio Browser'}</Text>
+            <Text style={styles.trackEyebrow}>{(station as any).language || (station as any).lang || (station as any).tags?.split(',')[0] || 'Radio Browser'}</Text>
             <Text numberOfLines={2} style={styles.trackHeadline}>
-              {station.name || 'Buffering...'}
+              {loading ? 'Connecting...' : (station.name || 'Unknown Station')}
             </Text>
           </View>
 
@@ -84,9 +92,9 @@ export default function PlayerScreen() {
             <Pressable style={styles.sideButton}>
               <Feather name="skip-back" size={28} color={palette.ink} />
             </Pressable>
-            <Pressable 
-              style={[styles.pauseButton, !playing && { backgroundColor: palette.accent }]} 
-              onPress={() => setPlaying(!playing)}
+            <Pressable
+              style={[styles.pauseButton, !playing && { backgroundColor: palette.accent }]}
+              onPress={toggle}
             >
               <Text style={styles.pauseText}>{playing ? 'Pause' : 'Play'}</Text>
             </Pressable>
@@ -132,18 +140,17 @@ const styles = StyleSheet.create({
   },
   frequencyWrap: {
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 18,
+    minHeight: 120,
   },
-  frequencyText: {
-    color: palette.ink,
-    fontSize: 82,
-    lineHeight: 82,
-    fontWeight: '700',
-    letterSpacing: -6,
+  stationLogo: {
+    width: 240,
+    height: 100,
+    opacity: 0.35,
   },
-  frequencyLead: {
-    color: '#b2b2b2',
-    fontWeight: '400',
+  logoFallback: {
+    opacity: 0.35,
   },
   stationCaption: {
     marginTop: 8,

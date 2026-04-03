@@ -4,9 +4,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Pressable,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,19 +15,22 @@ import {
 
 import { getStationsByCountry, type RadioStation } from '@/lib/radio';
 import { palette } from '@/components/radio-ui';
+import { usePlayer } from '@/lib/player-context';
 
 export default function StationsScreen() {
   const router = useRouter();
+  const { play } = usePlayer();
   const { code, name } = useLocalSearchParams<{ code: string, name: string }>();
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [search, setSearch] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!code) return;
     async function load() {
       try {
-        const data = await getStationsByCountry(code, 100);
+        const data = await getStationsByCountry(code, 5000);
         setStations(data);
       } catch (error) {
         console.error(error);
@@ -49,27 +52,32 @@ export default function StationsScreen() {
       <StatusBar style="dark" />
       <View style={styles.screen}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Feather name="arrow-left" size={32} color={palette.ink} />
-          </Pressable>
-          <View style={styles.headerTitleWrap}>
-            <Text numberOfLines={1} style={styles.headerSubtitle}>{name || 'Selected region'}</Text>
-            <Text style={styles.headerTitle}>Stations</Text>
-          </View>
-          <View style={styles.headerIcons}>
-            <Feather name="radio" size={34} color={palette.ink} />
-          </View>
-        </View>
-
-        <View style={styles.searchWrap}>
-          <Feather name="search" size={20} color={palette.softInk} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchField}
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search regional stations..."
-            placeholderTextColor={palette.softInk}
-          />
+          {!showSearch ? (
+            <>
+              <View style={styles.headerTitleWrap}>
+                <Text numberOfLines={1} style={styles.headerSubtitle}>{name || 'Selected region'}</Text>
+                <Text style={styles.headerTitle}>Stations</Text>
+              </View>
+              <Pressable onPress={() => setShowSearch(true)}>
+                <Feather name="search" size={34} color={palette.ink} />
+              </Pressable>
+            </>
+          ) : (
+            <View style={styles.searchHeader}>
+              <Feather name="search" size={24} color={palette.softInk} style={styles.searchIconInline} />
+              <TextInput
+                autoFocus
+                style={styles.searchField}
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search stations..."
+                placeholderTextColor={palette.softInk}
+              />
+              <Pressable onPress={() => { setShowSearch(false); setSearch(''); }}>
+                <Feather name="x" size={32} color={palette.ink} />
+              </Pressable>
+            </View>
+          )}
         </View>
 
         {loading ? (
@@ -77,28 +85,39 @@ export default function StationsScreen() {
             <ActivityIndicator color={palette.ink} size="large" />
           </View>
         ) : (
-          <ScrollView keyboardShouldPersistTaps="handled" style={styles.listScroll} contentContainerStyle={styles.listContent}>
-            {filtered.map((station) => (
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.id}
+            keyboardShouldPersistTaps="handled"
+            style={styles.listScroll}
+            contentContainerStyle={styles.listContent}
+            initialNumToRender={20}
+            maxToRenderPerBatch={20}
+            windowSize={10}
+            renderItem={({ item: station }) => (
               <Pressable 
-                key={station.id} 
-                onPress={() => router.push({
-                   pathname: '/player',
-                   params: { 
-                     id: station.id, 
-                     name: station.name,
-                     url: station.url,
-                     country: station.country,
-                     lang: station.language,
-                     tags: station.tags,
-                     homepage: station.homepage
-                   }
-                })}
+                onPress={() => {
+                   play(station);
+                   router.push({
+                      pathname: '/player',
+                      params: { 
+                        id: station.id, 
+                        name: station.name,
+                        url: station.url,
+                        country: station.country,
+                        lang: station.language,
+                        tags: station.tags,
+                        homepage: station.homepage,
+                        favicon: station.favicon,
+                      }
+                   });
+                }}
                 style={styles.row}
               >
                 <Text numberOfLines={1} style={styles.stationName}>{station.name}</Text>
               </Pressable>
-            ))}
-          </ScrollView>
+            )}
+          />
         )}
 
         <View style={styles.footer}>
@@ -137,26 +156,20 @@ const styles = StyleSheet.create({
     backgroundColor: palette.chip,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: -4,
   },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: 18,
-  },
-  searchWrap: {
-    marginHorizontal: 24,
-    marginBottom: 16,
+  searchHeader: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: palette.chip,
     borderRadius: 16,
     paddingHorizontal: 16,
-    height: 48,
+    height: 56,
   },
-  searchIcon: { marginRight: 10 },
+  searchIconInline: { marginRight: 10 },
   searchField: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
     color: palette.ink,
     fontWeight: '600',
   },
@@ -173,9 +186,11 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'baseline',
+    width: '100%',
   },
   stationName: {
+    flex: 1,
     color: palette.ink,
     fontSize: 34,
     lineHeight: 41,

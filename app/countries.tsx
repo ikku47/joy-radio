@@ -4,17 +4,17 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Pressable,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 
-import { getRadioCountries, type RadioCountry } from '@/lib/radio';
 import { palette } from '@/components/radio-ui';
+import { getRadioCountries, type RadioCountry } from '@/lib/radio';
 
 export default function CountriesScreen() {
   const router = useRouter();
@@ -82,25 +82,28 @@ export default function CountriesScreen() {
             <ActivityIndicator color={palette.ink} size="large" />
           </View>
         ) : (
-          <ScrollView 
-            keyboardShouldPersistTaps="handled" 
-            style={styles.listScroll} 
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.iso_3166_1}
+            keyboardShouldPersistTaps="handled"
+            style={styles.listScroll}
             contentContainerStyle={styles.listContent}
-          >
-            {filtered.map((country) => (
-              <Pressable 
-                key={country.iso_3166_1} 
+            initialNumToRender={20}
+            maxToRenderPerBatch={20}
+            windowSize={10}
+            renderItem={({ item: country }) => (
+              <Pressable
                 onPress={() => router.push({
-                   pathname: '/stations',
-                   params: { code: country.iso_3166_1, name: country.name }
+                  pathname: '/stations',
+                  params: { code: country.iso_3166_1, name: country.name }
                 })}
                 style={styles.row}
               >
                 <Text style={styles.countryName}>{country.name}</Text>
                 <Text style={styles.countryCount}>({country.stationcount})</Text>
               </Pressable>
-            ))}
-          </ScrollView>
+            )}
+          />
         )}
 
         <View style={styles.footer}>
@@ -169,14 +172,18 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    width: '100%',
   },
   countryName: {
+    flex: 1,
     color: palette.ink,
     fontSize: 34,
     lineHeight: 41,
     fontWeight: '700',
     letterSpacing: -2.2,
+    marginRight: 10,
   },
   countryCount: {
     marginLeft: 4,

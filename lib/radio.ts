@@ -1,4 +1,4 @@
-export const RADIO_API_BASE = 'https://de1.api.radio-browser.info/json';
+export const RADIO_API_BASE = "https://de1.api.radio-browser.info/json";
 
 export type RadioStation = {
   id: string;
@@ -15,7 +15,7 @@ export type RadioStation = {
   votes: number;
   clicks: number;
   lastCheckOk: number;
-  type: 'radio';
+  type: "radio";
 };
 
 export type RadioCountry = {
@@ -38,7 +38,7 @@ function readCachedValue(cacheKey: string, expiry: number) {
     return cached.data;
   }
 
-  if (typeof window === 'undefined' || !window.sessionStorage) {
+  if (typeof window === "undefined" || !window.sessionStorage) {
     return null;
   }
 
@@ -70,7 +70,7 @@ function writeCachedValue(cacheKey: string, data: unknown) {
 
   memoryCache.set(cacheKey, entry);
 
-  if (typeof window !== 'undefined' && window.sessionStorage) {
+  if (typeof window !== "undefined" && window.sessionStorage) {
     window.sessionStorage.setItem(cacheKey, JSON.stringify(entry));
   }
 }
@@ -100,13 +100,17 @@ export async function getRadioCountries() {
 }
 
 export async function getTopRadioStations(limit = 24, offset = 0) {
-  const url = `${RADIO_API_BASE}/stations?order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
+  const url = `${RADIO_API_BASE}/stations?hidebroken=true&order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
   const data = await fetchWithCache<unknown[]>(url);
   return formatStations(data);
 }
 
-export async function getStationsByCountry(countryCode: string, limit = 100, offset = 0) {
-  const url = `${RADIO_API_BASE}/stations/bycountrycodeexact/${countryCode}?order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
+export async function getStationsByCountry(
+  countryCode: string,
+  limit = 100,
+  offset = 0,
+) {
+  const url = `${RADIO_API_BASE}/stations/bycountrycodeexact/${countryCode}?hidebroken=true&order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
   const data = await fetchWithCache<unknown[]>(url);
   return formatStations(data);
 }
@@ -120,21 +124,21 @@ function formatStations(data: unknown[]) {
     const item = station as Record<string, string | number | undefined>;
 
     return {
-      id: String(item.stationuuid ?? ''),
-      name: String(item.name ?? '').trim(),
-      url: String(item.url_resolved ?? item.url ?? ''),
-      homepage: String(item.homepage ?? ''),
-      favicon: String(item.favicon ?? ''),
-      tags: String(item.tags ?? ''),
-      country: String(item.country ?? ''),
-      countryCode: String(item.countrycode ?? ''),
-      language: String(item.language ?? ''),
-      codec: String(item.codec ?? ''),
+      id: String(item.stationuuid ?? ""),
+      name: String(item.name ?? "").trim(),
+      url: String(item.url_resolved ?? item.url ?? ""),
+      homepage: String(item.homepage ?? ""),
+      favicon: String(item.favicon ?? ""),
+      tags: String(item.tags ?? ""),
+      country: String(item.country ?? ""),
+      countryCode: String(item.countrycode ?? ""),
+      language: String(item.language ?? ""),
+      codec: String(item.codec ?? ""),
       bitrate: Number(item.bitrate ?? 0),
       votes: Number(item.votes ?? 0),
       clicks: Number(item.clickcount ?? 0),
       lastCheckOk: Number(item.lastcheckok ?? 0),
-      type: 'radio' as const,
+      type: "radio" as const,
     };
   });
 }
