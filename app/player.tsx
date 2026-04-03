@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { Capsule, IconCircle, palette, VinylRecord, WaveformVisualizer } from '@/components/radio-ui';
+import { Capsule, IconCircle, palette, typography, VinylRecord, WaveformVisualizer } from '@/components/radio-ui';
 import { usePlayer } from '@/lib/player-context';
 
 export default function PlayerScreen() {
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: palette.softInk,
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: typography.medium,
     textAlign: 'center',
   },
   actionRow: {
@@ -167,14 +167,14 @@ const styles = StyleSheet.create({
   trackEyebrow: {
     color: palette.softInk,
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: typography.medium,
   },
   trackHeadline: {
     marginTop: 4,
     color: palette.ink,
     fontSize: 28,
     lineHeight: 32,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -1.5,
   },
   transportRow: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   pauseText: {
     color: '#fff',
     fontSize: 22,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -0.5,
   },
 });

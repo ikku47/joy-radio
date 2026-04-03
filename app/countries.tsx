@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 
-import { MiniPlayer, palette } from '@/components/radio-ui';
+import { MiniPlayer, palette, typography } from '@/components/radio-ui';
 import { getRadioCountries, type RadioCountry } from '@/lib/radio';
 
 export default function CountriesScreen() {
@@ -141,11 +141,11 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
     fontSize: 28,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -1.5,
   },
   headerPrimary: { color: palette.ink },
-  headerSecondary: { color: palette.softInk, fontWeight: '500' },
+  headerSecondary: { color: palette.softInk, fontFamily: typography.medium },
   searchHeader: {
     flex: 1,
     flexDirection: 'row',
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     color: palette.ink,
-    fontWeight: '600',
+    fontFamily: typography.semiBold,
   },
   center: {
     flex: 1,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     color: palette.ink,
     fontSize: 34,
     lineHeight: 41,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -2.2,
     marginRight: 10,
   },
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     color: palette.softInk,
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: typography.medium,
     lineHeight: 24,
   },
   footer: {
@@ -207,12 +207,13 @@ const styles = StyleSheet.create({
   footerLabel: {
     color: palette.softInk,
     fontSize: 14,
+    fontFamily: typography.medium,
   },
   footerValue: {
     color: palette.ink,
     fontSize: 46,
     lineHeight: 46,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -3.2,
   },
 });

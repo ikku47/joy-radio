@@ -28,6 +28,14 @@ export const palette = {
   mutedPanel: '#d7d7d7',
 };
 
+export const typography = {
+  regular: 'Manrope_400Regular',
+  medium: 'Manrope_500Medium',
+  semiBold: 'Manrope_600SemiBold',
+  bold: 'Manrope_700Bold',
+  extraBold: 'Manrope_800ExtraBold',
+};
+
 export function Scale({
   height = 54,
   withLabels = false,
@@ -266,11 +274,20 @@ const styles = StyleSheet.create({
   scaleMarkMajor: { height: 26 },
   scaleMarkMinor: { height: 15 },
   scaleLabels: { marginTop: 6, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
-  scaleLabel: { color: palette.softInk, fontSize: 11, fontWeight: '500' },
+  scaleLabel: {
+    color: palette.softInk,
+    fontSize: 11,
+    fontFamily: typography.medium,
+  },
   capsule: { borderRadius: 18, backgroundColor: palette.chip, paddingHorizontal: 18, paddingVertical: 11 },
   capsuleCompact: { minWidth: 74, alignItems: 'center' },
   capsuleSelected: { backgroundColor: palette.ink },
-  capsuleText: { color: palette.ink, fontSize: 18, fontWeight: '600', letterSpacing: -0.7 },
+  capsuleText: {
+    color: palette.ink,
+    fontSize: 18,
+    fontFamily: typography.semiBold,
+    letterSpacing: -0.7,
+  },
   capsuleTextSelected: { color: palette.shell },
   iconCircle: { height: 56, width: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#e6e3df', backgroundColor: '#fbfaf8' },
   scaleNeedle: { position: 'absolute', top: -10, bottom: -10, left: '50%', width: 3, backgroundColor: palette.accent, zIndex: 10 },

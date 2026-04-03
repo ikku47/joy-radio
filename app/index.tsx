@@ -17,7 +17,7 @@ import Animated, {
   withTiming
 } from 'react-native-reanimated';
 
-import { palette, Scale } from '@/components/radio-ui';
+import { palette, Scale, typography } from '@/components/radio-ui';
 
 const scatterLayout = [
   { key: 'France', top: '12%', left: '7%', tone: 'dark' },
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   scatterLabel: {
     position: 'absolute',
     fontSize: 14,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -0.6,
   },
   introBottom: {
@@ -181,13 +181,13 @@ const styles = StyleSheet.create({
   listenTitle: {
     color: '#f6f5f3',
     fontSize: 34,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -1.3,
   },
   listenSubtitle: {
     color: '#9d9d9d',
     fontSize: 34,
-    fontWeight: '400',
+    fontFamily: typography.regular,
     letterSpacing: -1.3,
   },
   knobContainer: {
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     color: '#f7f6f4',
     fontSize: 72,
     lineHeight: 72,
-    fontWeight: '300',
+    fontFamily: typography.regular,
     letterSpacing: -4.2,
   },
   radioDot: {

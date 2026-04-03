@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 
-import { MiniPlayer, palette } from '@/components/radio-ui';
+import { MiniPlayer, palette, typography } from '@/components/radio-ui';
 import { usePlayer } from '@/lib/player-context';
 import { getStationsByCountry, type RadioStation } from '@/lib/radio';
 
@@ -150,8 +150,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   headerTitleWrap: { flex: 1 },
-  headerSubtitle: { color: palette.softInk, fontSize: 13, fontWeight: '700', textTransform: 'uppercase' },
-  headerTitle: { color: palette.ink, fontSize: 28, fontWeight: '700', letterSpacing: -1.5 },
+  headerSubtitle: {
+    color: palette.softInk,
+    fontSize: 13,
+    fontFamily: typography.bold,
+    textTransform: 'uppercase',
+  },
+  headerTitle: {
+    color: palette.ink,
+    fontSize: 28,
+    fontFamily: typography.bold,
+    letterSpacing: -1.5,
+  },
   backButton: {
     width: 48,
     height: 48,
@@ -174,7 +184,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     color: palette.ink,
-    fontWeight: '600',
+    fontFamily: typography.semiBold,
   },
   center: {
     flex: 1,
@@ -197,7 +207,7 @@ const styles = StyleSheet.create({
     color: palette.ink,
     fontSize: 34,
     lineHeight: 41,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -2.2,
   },
   footer: {
@@ -212,12 +222,13 @@ const styles = StyleSheet.create({
   footerLabel: {
     color: palette.softInk,
     fontSize: 14,
+    fontFamily: typography.medium,
   },
   footerValue: {
     color: palette.ink,
     fontSize: 46,
     lineHeight: 46,
-    fontWeight: '700',
+    fontFamily: typography.bold,
     letterSpacing: -3.2,
   },
 });
