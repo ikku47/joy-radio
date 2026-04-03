@@ -1,5 +1,6 @@
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState, useRef } from 'react';
 import {
   Pressable,
   SafeAreaView,
@@ -7,6 +8,14 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Audio } from 'expo-av';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming
+} from 'react-native-reanimated';
 
 import { palette, Scale } from '@/components/radio-ui';
 
@@ -20,29 +29,79 @@ const scatterLayout = [
 ] as const;
 
 export default function IntroScreen() {
+  const router = useRouter();
+  const rotation = useSharedValue(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const staticRef = useRef<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, { duration: 5000, easing: Easing.linear }),
+      -1,
+      false
+    );
+
+    const interval = setInterval(() => {
+      setActiveIndex((prev: number) => (prev + 1) % scatterLayout.length);
+    }, 2800);
+
+    // Play static audio and navigate when done
+    async function setupStatic() {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require('../assets/sounds/fm-static.mp3'),
+          { shouldPlay: true, isLooping: false, volume: 0.15 }
+        );
+        staticRef.current = sound;
+        
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            router.replace('/countries');
+          }
+        });
+      } catch (e) {
+        console.warn('Static intro failed', e);
+      }
+    }
+    setupStatic();
+
+    return () => {
+      clearInterval(interval);
+      staticRef.current?.unloadAsync();
+    };
+  }, []);
+
+  const animatedKnobStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
       <View style={styles.screen}>
         <View style={styles.panel}>
           <View style={styles.introTop}>
-            {scatterLayout.map((item) => (
-              <Text
-                key={item.key}
-                style={[
-                  styles.scatterLabel,
-                  {
-                    top: item.top,
-                    left: item.left,
-                    color: item.tone === 'dark' ? palette.ink : palette.softInk,
-                  },
-                ]}>
-                {item.key.toUpperCase()}
-              </Text>
-            ))}
+            {scatterLayout.map((item, index) => {
+              const active = index === activeIndex;
+              return (
+                <Text
+                  key={item.key}
+                  style={[
+                    styles.scatterLabel,
+                    {
+                      top: item.top,
+                      left: item.left,
+                      color: active ? palette.accent : (item.tone === 'dark' ? palette.ink : palette.softInk),
+                      opacity: active ? 1 : 0.8,
+                    },
+                  ]}>
+                  {item.key.toUpperCase()}
+                </Text>
+              );
+            })}
           </View>
 
-          <Scale height={58} />
+          <Scale height={58} animated />
 
           <View style={styles.introBottom}>
             <View style={styles.verticalLines}>
@@ -55,8 +114,12 @@ export default function IntroScreen() {
             <Text style={styles.listenSubtitle}>Online</Text>
 
             <Link href="/countries" asChild>
-              <Pressable style={styles.knob}>
-                <View style={styles.knobCore} />
+              <Pressable style={styles.knobContainer}>
+                <Animated.View style={[styles.knob, animatedKnobStyle]}>
+                  <View style={styles.knobGroove1} />
+                  <View style={styles.knobGroove2} />
+                  <View style={styles.knobCore} />
+                </Animated.View>
               </Pressable>
             </Link>
 
@@ -127,11 +190,14 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     letterSpacing: -1.3,
   },
-  knob: {
+  knobContainer: {
     marginTop: 'auto',
-    height: 60,
-    width: 60,
-    borderRadius: 30,
+    alignSelf: 'flex-start',
+  },
+  knob: {
+    height: 64,
+    width: 64,
+    borderRadius: 32,
     backgroundColor: palette.warm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -140,13 +206,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 8,
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  knobGroove1: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
+  },
+  knobGroove2: {
+    position: 'absolute',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
   },
   knobCore: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: palette.dark,
-    opacity: 0.4,
+    opacity: 0.5,
   },
   radioWordmark: {
     marginTop: 28,

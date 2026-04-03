@@ -97,7 +97,7 @@ export default function StationsScreen() {
             renderItem={({ item: station }) => (
               <Pressable 
                 onPress={() => {
-                   play(station);
+                   play(station, filtered);
                    router.push({
                       pathname: '/player',
                       params: { 

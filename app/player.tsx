@@ -16,7 +16,7 @@ import { usePlayer } from '@/lib/player-context';
 
 export default function PlayerScreen() {
   const router = useRouter();
-  const { currentStation, playing, loading, toggle } = usePlayer();
+  const { currentStation, playing, loading, toggle, next, previous } = usePlayer();
   const params = useLocalSearchParams<{
     id: string,
     name: string,
@@ -89,7 +89,7 @@ export default function PlayerScreen() {
           </View>
 
           <View style={styles.transportRow}>
-            <Pressable style={styles.sideButton}>
+            <Pressable style={styles.sideButton} onPress={previous}>
               <Feather name="skip-back" size={28} color={palette.ink} />
             </Pressable>
             <Pressable
@@ -98,7 +98,7 @@ export default function PlayerScreen() {
             >
               <Text style={styles.pauseText}>{playing ? 'Pause' : 'Play'}</Text>
             </Pressable>
-            <Pressable style={styles.sideButton}>
+            <Pressable style={styles.sideButton} onPress={next}>
               <Feather name="skip-forward" size={28} color={palette.ink} />
             </Pressable>
           </View>
