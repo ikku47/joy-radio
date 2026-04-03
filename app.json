@@ -19,8 +19,7 @@
         "monochromeImage": "./assets/logo.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.joyradio"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",

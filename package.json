@@ -6,7 +6,7 @@
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
-    "build:android": "expo prebuild --platform android && cd android && ./gradlew assembleRelease",
+    "build:android": "cd android && NODE_ENV=production ./gradlew :app:generateAutolinkingPackageList :app:generateAutolinkingNewArchitectureFiles --rerun-tasks && cd .. && node scripts/fix-android-package.js && cd android && NODE_ENV=production ./gradlew assembleRelease",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint"
