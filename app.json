@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "joy-radio",
+    "name": "Joy Radio",
     "slug": "joy-radio",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/logo.png",
     "scheme": "joyradio",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,25 +12,26 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.eq.joyradio",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#c9c6c3",
+        "foregroundImage": "./assets/logo.png",
+        "monochromeImage": "./assets/logo.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.joyradio"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

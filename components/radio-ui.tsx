@@ -265,7 +265,7 @@ export function VinylRecord({
             </View>
           )}
         </View>
-        <View style={vinylStyles.spindle} />
+        {/* <View style={vinylStyles.spindle} /> */}
       </Animated.View>
     </View>
   );
