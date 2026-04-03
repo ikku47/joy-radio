@@ -13,9 +13,9 @@ import {
   View,
 } from 'react-native';
 
-import { getStationsByCountry, type RadioStation } from '@/lib/radio';
-import { palette } from '@/components/radio-ui';
+import { MiniPlayer, palette } from '@/components/radio-ui';
 import { usePlayer } from '@/lib/player-context';
+import { getStationsByCountry, type RadioStation } from '@/lib/radio';
 
 export default function StationsScreen() {
   const router = useRouter();
@@ -95,22 +95,22 @@ export default function StationsScreen() {
             maxToRenderPerBatch={20}
             windowSize={10}
             renderItem={({ item: station }) => (
-              <Pressable 
+              <Pressable
                 onPress={() => {
-                   play(station, filtered);
-                   router.push({
-                      pathname: '/player',
-                      params: { 
-                        id: station.id, 
-                        name: station.name,
-                        url: station.url,
-                        country: station.country,
-                        lang: station.language,
-                        tags: station.tags,
-                        homepage: station.homepage,
-                        favicon: station.favicon,
-                      }
-                   });
+                  play(station, filtered);
+                  router.push({
+                    pathname: '/player',
+                    params: {
+                      id: station.id,
+                      name: station.name,
+                      url: station.url,
+                      country: station.country,
+                      lang: station.language,
+                      tags: station.tags,
+                      homepage: station.homepage,
+                      favicon: station.favicon,
+                    }
+                  });
                 }}
                 style={styles.row}
               >
@@ -121,8 +121,11 @@ export default function StationsScreen() {
         )}
 
         <View style={styles.footer}>
-          <Text style={styles.footerLabel}>Found channels</Text>
-          <Text style={styles.footerValue}>{filtered.length}</Text>
+          <MiniPlayer />
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={styles.footerLabel}>Found channels</Text>
+            <Text style={styles.footerValue}>{filtered.length}</Text>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -199,9 +202,12 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 'auto',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingBottom: 24,
+    paddingTop: 12,
   },
   footerLabel: {
     color: palette.softInk,

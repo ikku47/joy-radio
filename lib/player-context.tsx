@@ -22,6 +22,7 @@ interface PlayerContextType {
   next: () => Promise<void>;
   previous: () => Promise<void>;
   staticWaveform: { value: number };
+  meter: { value: number };
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -36,6 +37,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
   const staticWaveform = useSharedValue(0);
+  const meter = useSharedValue(0);
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -62,6 +64,24 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (soundRef.current) soundRef.current.unloadAsync();
     };
   }, []);
+
+  // Audio energy/meter simulation loop
+  useEffect(() => {
+    if (playing) {
+      meter.value = withRepeat(
+        withSequence(
+          withTiming(0.8, { duration: 150, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0.4, { duration: 100, easing: Easing.inOut(Easing.sin) }),
+          withTiming(1.0, { duration: 200, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0.6, { duration: 120, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        true
+      );
+    } else {
+      meter.value = withTiming(0, { duration: 500 });
+    }
+  }, [playing]);
 
 
   const play = async (station: RadioStation, list?: RadioStation[]) => {
@@ -159,7 +179,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       toggle, 
       next, 
       previous, 
-      staticWaveform 
+      staticWaveform,
+      meter
     }}>
       {children}
     </PlayerContext.Provider>

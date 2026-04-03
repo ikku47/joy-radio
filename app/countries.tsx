@@ -13,7 +13,7 @@ import {
   View,
 } from 'react-native';
 
-import { palette } from '@/components/radio-ui';
+import { MiniPlayer, palette } from '@/components/radio-ui';
 import { getRadioCountries, type RadioCountry } from '@/lib/radio';
 
 export default function CountriesScreen() {
@@ -107,8 +107,11 @@ export default function CountriesScreen() {
         )}
 
         <View style={styles.footer}>
-          <Text style={styles.footerLabel}>Total Global</Text>
-          <Text style={styles.footerValue}>{totalStations ? totalStations.toLocaleString() : '...'}</Text>
+          <MiniPlayer />
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={styles.footerLabel}>Total Global</Text>
+            <Text style={styles.footerValue}>{totalStations ? totalStations.toLocaleString() : '...'}</Text>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -194,9 +197,12 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 'auto',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 24,
     paddingBottom: 24,
+    paddingTop: 12,
   },
   footerLabel: {
     color: palette.softInk,

@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Pressable,
   SafeAreaView,
@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { Capsule, IconCircle, palette, Scale } from '@/components/radio-ui';
+import { Capsule, IconCircle, palette, VinylRecord, WaveformVisualizer } from '@/components/radio-ui';
 import { usePlayer } from '@/lib/player-context';
 
 export default function PlayerScreen() {
@@ -32,9 +32,6 @@ export default function PlayerScreen() {
 
   const station = currentStation || params;
 
-  // Derive a pseudo-frequency for design flavor
-  const frequency = (92 + (parseInt(station.id?.slice(0, 4), 16) % 5.8 || 0)).toFixed(1);
-
   const subLabel = station.homepage
     ? station.homepage.replace(/^https?:\/\//, '').replace(/\/$/, '')
     : station.name || 'Station Info';
@@ -54,18 +51,7 @@ export default function PlayerScreen() {
           </View>
 
           <View style={styles.frequencyWrap}>
-            {station.favicon ? (
-              <Image
-                source={{ uri: station.favicon }}
-                style={styles.stationLogo}
-                contentFit="contain"
-                transition={500}
-              />
-            ) : (
-              <View style={styles.logoFallback}>
-                <Feather name="mic" size={82} color={palette.ink} />
-              </View>
-            )}
+            <VinylRecord uri={station.favicon} active={playing} size={260} />
             <Text numberOfLines={1} style={styles.stationCaption}>{subLabel}</Text>
           </View>
 
@@ -77,8 +63,12 @@ export default function PlayerScreen() {
           </View>
 
           <View style={styles.tunerWrap}>
-            <Scale height={76} withLabels />
-            <View style={styles.tunerNeedle} />
+            {/* 
+              Reverting to our High-Performance JS visualizer 
+              because @kaannn is a native-only package not compatible with Expo Go.
+              Matched to the 'Kaannn' style: 5px bars, rounded, themed colors.
+            */}
+            <WaveformVisualizer active={playing} />
           </View>
 
           <View style={styles.trackMeta}>
@@ -134,10 +124,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
   },
-  playerModeRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
   frequencyWrap: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -169,15 +155,9 @@ const styles = StyleSheet.create({
   tunerWrap: {
     paddingHorizontal: 0,
     position: 'relative',
-  },
-  tunerNeedle: {
-    position: 'absolute',
-    top: -20,
-    bottom: -44,
-    left: '50%',
-    width: 3,
-    marginLeft: -1.5,
-    backgroundColor: palette.accent,
+    overflow: 'hidden',
+    height: 100,
+    justifyContent: 'center',
   },
   trackMeta: {
     marginTop: 'auto',
