@@ -1,8 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Pressable,
   SafeAreaView,
@@ -11,7 +10,7 @@ import {
   View,
 } from 'react-native';
 
-import { Capsule, IconCircle, palette, typography, VinylRecord, WaveformVisualizer } from '@/components/radio-ui';
+import { Capsule, palette, typography, VinylRecord } from '@/components/radio-ui';
 import { usePlayer } from '@/lib/player-context';
 
 export default function PlayerScreen() {
@@ -55,21 +54,6 @@ export default function PlayerScreen() {
             <Text numberOfLines={1} style={styles.stationCaption}>{subLabel}</Text>
           </View>
 
-          <View style={styles.actionRow}>
-            <Pressable onPress={() => setFavorite(f => !f)}>
-              <IconCircle icon="star" accent={favorite} />
-            </Pressable>
-            <IconCircle icon="share" />
-          </View>
-
-          <View style={styles.tunerWrap}>
-            {/* 
-              Reverting to our High-Performance JS visualizer 
-              because @kaannn is a native-only package not compatible with Expo Go.
-              Matched to the 'Kaannn' style: 5px bars, rounded, themed colors.
-            */}
-            <WaveformVisualizer active={playing} />
-          </View>
 
           <View style={styles.trackMeta}>
             <Text style={styles.trackEyebrow}>{(station as any).language || (station as any).lang || (station as any).tags?.split(',')[0] || 'Radio Browser'}</Text>
