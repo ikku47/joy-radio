@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { Audio } from 'expo-av';
-import { usePathname } from 'expo-router';
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
 import Animated, { 
   useSharedValue, 
-  useAnimatedStyle, 
   withRepeat, 
   withTiming, 
   withSequence,
@@ -32,18 +30,28 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [stationList, setStationList] = useState<RadioStation[]>([]);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<AudioPlayer | null>(null);
   const activeIdRef = useRef<string | null>(null);
-  const pathname = usePathname();
   
   const staticWaveform = useSharedValue(0);
   const meter = useSharedValue(0);
 
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      staysActiveInBackground: true,
-      playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
+    void setAudioModeAsync({
+      shouldPlayInBackground: true,
+      playsInSilentMode: true,
+      interruptionMode: 'doNotMix',
+    });
+
+    const player = createAudioPlayer(null, {
+      updateInterval: 250,
+      keepAudioSessionActive: true,
+    });
+    playerRef.current = player;
+
+    const subscription = player.addListener('playbackStatusUpdate', (status) => {
+      setPlaying(status.playing);
+      setLoading(!status.isLoaded || status.isBuffering);
     });
 
     // Highly chaotic noise waveform simulation
@@ -61,7 +69,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => {
-      if (soundRef.current) soundRef.current.unloadAsync();
+      subscription.remove();
+      player.clearLockScreenControls();
+      player.remove();
+      playerRef.current = null;
     };
   }, []);
 
@@ -85,61 +96,63 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
 
   const play = async (station: RadioStation, list?: RadioStation[]) => {
+    const player = playerRef.current;
+
+    if (!player) {
+      return;
+    }
+
     if (list) {
       setStationList(list);
     }
     activeIdRef.current = station.id;
 
-    if (soundRef.current) {
-      await soundRef.current.unloadAsync();
-      soundRef.current = null;
-    }
-
     setCurrentStation(station);
     setLoading(true);
     setPlaying(false);
 
-    try {
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: station.url },
-        { shouldPlay: true }
-      );
-
-      if (activeIdRef.current !== station.id) {
-        await newSound.unloadAsync();
-        return;
+    player.replace({ uri: station.url });
+    player.setActiveForLockScreen(
+      true,
+      {
+        title: station.name || 'Joy Radio',
+        artist: station.country || station.language || 'Live radio',
+        albumTitle: 'Joy Radio',
+        artworkUrl: station.favicon || undefined,
+      },
+      {
+        showSeekBackward: true,
+        showSeekForward: true,
       }
-
-      soundRef.current = newSound;
-      setPlaying(true);
-      
-      newSound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          setPlaying(status.isPlaying);
-        }
-      });
-    } catch (error) {
-      console.error('Radio play error', error);
-      if (activeIdRef.current === station.id) {
-        setPlaying(false);
-      }
-    } finally {
-      if (activeIdRef.current === station.id) {
-        setLoading(false);
-      }
-    }
+    );
+    player.play();
   };
 
   const pause = async () => {
-    if (soundRef.current) {
-      await soundRef.current.pauseAsync();
+    if (playerRef.current) {
+      playerRef.current.pause();
       setPlaying(false);
     }
   };
 
   const resume = async () => {
-    if (soundRef.current) {
-      await soundRef.current.playAsync();
+    if (playerRef.current) {
+      if (currentStation) {
+        playerRef.current.setActiveForLockScreen(
+          true,
+          {
+            title: currentStation.name || 'Joy Radio',
+            artist: currentStation.country || currentStation.language || 'Live radio',
+            albumTitle: 'Joy Radio',
+            artworkUrl: currentStation.favicon || undefined,
+          },
+          {
+            showSeekBackward: true,
+            showSeekForward: true,
+          }
+        );
+      }
+      playerRef.current.play();
       setPlaying(true);
     }
   };
