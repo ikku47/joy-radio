@@ -56,7 +56,7 @@ export default function IntroScreen() {
         
         sound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded && status.didJustFinish) {
-            router.replace('/countries');
+            router.replace('/discover');
           }
         });
       } catch (e) {
@@ -113,7 +113,7 @@ export default function IntroScreen() {
             <Text style={styles.listenTitle}>Listen</Text>
             <Text style={styles.listenSubtitle}>Online</Text>
 
-            <Link href="/countries" asChild>
+            <Link href="/discover" asChild>
               <Pressable style={styles.knobContainer}>
                 <Animated.View style={[styles.knob, animatedKnobStyle]}>
                   <View style={styles.knobGroove1} />

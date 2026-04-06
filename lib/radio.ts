@@ -24,6 +24,17 @@ export type RadioCountry = {
   stationcount: number;
 };
 
+export type RadioLanguage = {
+  name: string;
+  iso_639?: string;
+  stationcount: number;
+};
+
+export type RadioTag = {
+  name: string;
+  stationcount: number;
+};
+
 type CacheEntry = {
   data: unknown;
   timestamp: number;
@@ -95,24 +106,57 @@ async function fetchWithCache<T>(url: string, expiry = 3_600_000): Promise<T> {
 }
 
 export async function getRadioCountries() {
-  const url = `${RADIO_API_BASE}/countries?order=stationcount&reverse=true`;
-  return fetchWithCache<RadioCountry[]>(url, 86_400_000);
+  const url = `${RADIO_API_BASE}/countries?order=stationcount&reverse=true&limit=1000`;
+  const data = await fetchWithCache<RadioCountry[]>(url, 86_400_000);
+  return data.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getTopRadioStations(limit = 24, offset = 0) {
   const url = `${RADIO_API_BASE}/stations?hidebroken=true&order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
   const data = await fetchWithCache<unknown[]>(url);
-  return formatStations(data);
+  return formatStations(data).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getStationsByCountry(
   countryCode: string,
-  limit = 100,
+  limit = 200,
   offset = 0,
 ) {
   const url = `${RADIO_API_BASE}/stations/bycountrycodeexact/${countryCode}?hidebroken=true&order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
   const data = await fetchWithCache<unknown[]>(url);
-  return formatStations(data);
+  return formatStations(data).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function getRadioLanguages() {
+  const url = `${RADIO_API_BASE}/languages?order=stationcount&reverse=true&limit=1000`;
+  const data = await fetchWithCache<RadioLanguage[]>(url, 86_400_000);
+  return data.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function getStationsByLanguage(
+  language: string,
+  limit = 200,
+  offset = 0,
+) {
+  const url = `${RADIO_API_BASE}/stations/bylanguage/${encodeURIComponent(language)}?hidebroken=true&order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
+  const data = await fetchWithCache<unknown[]>(url);
+  return formatStations(data).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function getRadioTags() {
+  const url = `${RADIO_API_BASE}/tags?order=stationcount&reverse=true&limit=1000`;
+  const data = await fetchWithCache<RadioTag[]>(url, 86_400_000);
+  return data.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function getStationsByTag(
+  tag: string,
+  limit = 200,
+  offset = 0,
+) {
+  const url = `${RADIO_API_BASE}/stations/bytag/${encodeURIComponent(tag)}?hidebroken=true&order=votes&reverse=true&offset=${offset}&limit=${limit}&lastcheckok=1`;
+  const data = await fetchWithCache<unknown[]>(url);
+  return formatStations(data).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function formatStations(data: unknown[]) {
@@ -122,13 +166,27 @@ function formatStations(data: unknown[]) {
 
   return data.map((station) => {
     const item = station as Record<string, string | number | undefined>;
+    let favicon = String(item.favicon ?? "");
+
+    // Fallback to homepage favicon if missing
+    if (!favicon && item.homepage) {
+      try {
+        const homepageUrl = String(item.homepage).trim();
+        if (homepageUrl.startsWith('http')) {
+          const url = new URL(homepageUrl);
+          favicon = `${url.origin}/favicon.ico`;
+        }
+      } catch {
+        // Ignore invalid URLs
+      }
+    }
 
     return {
       id: String(item.stationuuid ?? ""),
       name: String(item.name ?? "").trim(),
       url: String(item.url_resolved ?? item.url ?? ""),
       homepage: String(item.homepage ?? ""),
-      favicon: String(item.favicon ?? ""),
+      favicon: favicon,
       tags: String(item.tags ?? ""),
       country: String(item.country ?? ""),
       countryCode: String(item.countrycode ?? ""),

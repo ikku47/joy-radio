@@ -8,9 +8,10 @@ Joy Radio is a design-forward online radio app built with Expo and React Native.
 
 ## Highlights
 
-- Full-screen mobile radio experience with custom intro, countries, stations, and player screens
+- Full-screen mobile radio experience with custom intro, discovery, browsing, stations, and player screens
 - Live radio discovery powered by the Radio Browser directory
-- Searchable country and station flows
+- Browse by Country, Language, or Music Style (Tags)
+- Searchable browsing and station flows
 - Shared audio player context for playback and mini-player state
 - Custom typography and motion built around the app's visual system
 
@@ -36,15 +37,20 @@ https://de1.api.radio-browser.info/json
 Primary data used by the app includes:
 
 - `/countries`
+- `/languages`
+- `/tags`
 - `/stations`
 - `/stations/bycountrycodeexact/:code`
+- `/stations/bylanguage/:language`
+- `/stations/bytag/:tag`
 
 ## Project Structure
 
 ```txt
 app/
   index.tsx        Intro screen
-  countries.tsx    Country listing and search
+  discover.tsx     Discovery mode selector (Country, Language, Style)
+  browse.tsx       Dynamic listing (Countries, Languages, or Styles)
   stations.tsx     Station listing and search
   player.tsx       Playback screen
 

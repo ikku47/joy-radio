@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,81 +19,45 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { MiniPlayer, palette, typography } from '@/components/radio-ui';
-import { usePlayer } from '@/lib/player-context';
 import { 
-  getStationsByCountry, 
-  getStationsByLanguage, 
-  getStationsByTag, 
-  type RadioStation 
+  getRadioCountries, 
+  getRadioLanguages, 
+  getRadioTags, 
+  type RadioCountry, 
+  type RadioLanguage, 
+  type RadioTag 
 } from '@/lib/radio';
 
-function StationRow({ station, index, onPress }: { station: RadioStation, index: number, onPress: () => void }) {
-  const [error, setError] = useState(false);
+type BrowseItem = {
+  name: string;
+  count: number;
+  id: string; // ISO for country, name for others
+};
 
-  return (
-    <Animated.View 
-      entering={FadeInDown.duration(400).delay(Math.min(index * 30, 600))}
-    >
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [
-          styles.row,
-          pressed && styles.rowPressed
-        ]}
-      >
-        <View style={styles.stationIconBox}>
-          {(station.favicon && !error) ? (
-            <Image 
-              source={{ uri: station.favicon }} 
-              style={styles.stationFavicon} 
-              contentFit="contain" 
-              onError={() => setError(true)}
-            />
-          ) : (
-            <Feather name="radio" size={20} color={palette.softInk} />
-          )}
-        </View>
-        <View style={styles.rowInfo}>
-          <Text numberOfLines={1} style={styles.stationName}>{station.name}</Text>
-          <Text numberOfLines={1} style={styles.stationMeta}>
-            {station.tags ? station.tags.split(',').slice(0, 2).join(' • ') : (station.language || station.country)}
-          </Text>
-        </View>
-        <View style={styles.rowAction}>
-           <Feather name="chevron-right" size={20} color={palette.softInk} />
-        </View>
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-export default function StationsScreen() {
+export default function BrowseScreen() {
   const router = useRouter();
-  const { play } = usePlayer();
-  const { type, id, name } = useLocalSearchParams<{ 
-    type?: 'countries' | 'languages' | 'tags', 
-    id: string, 
-    name: string 
-  }>();
-  const [stations, setStations] = useState<RadioStation[]>([]);
+  const { type } = useLocalSearchParams<{ type: 'countries' | 'languages' | 'tags' }>();
+  const [items, setItems] = useState<BrowseItem[]>([]);
   const [search, setSearch] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
     async function load() {
       try {
         setLoading(true);
-        let data: RadioStation[] = [];
-        if (type === 'languages') {
-          data = await getStationsByLanguage(id, 500);
+        let data: BrowseItem[] = [];
+        if (type === 'countries') {
+          const res = await getRadioCountries();
+          data = res.map(c => ({ name: c.name, count: c.stationcount, id: c.iso_3166_1 }));
+        } else if (type === 'languages') {
+          const res = await getRadioLanguages();
+          data = res.map(l => ({ name: l.name, count: l.stationcount, id: l.name }));
         } else if (type === 'tags') {
-          data = await getStationsByTag(id, 500);
-        } else {
-          data = await getStationsByCountry(id, 500);
+          const res = await getRadioTags();
+          data = res.map(t => ({ name: t.name, count: t.stationcount, id: t.name }));
         }
-        setStations(data);
+        setItems(data);
       } catch (error) {
         console.error(error);
       } finally {
@@ -102,13 +65,19 @@ export default function StationsScreen() {
       }
     }
     load();
-  }, [id, type]);
+  }, [type]);
+
+  const titles = {
+    countries: 'Country',
+    languages: 'Language',
+    tags: 'Style',
+  };
 
   const filtered = useMemo(() => {
-    if (!search) return stations;
+    if (!search) return items;
     const q = search.toLowerCase();
-    return stations.filter((s) => s.name.toLowerCase().includes(q));
-  }, [stations, search]);
+    return items.filter((item) => item.name.toLowerCase().includes(q));
+  }, [items, search]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -120,14 +89,13 @@ export default function StationsScreen() {
                 <Feather name="arrow-left" size={24} color={palette.ink} />
              </View>
           </Pressable>
-          
           <View style={styles.headerTitleWrap}>
             {!showSearch ? (
               <Animated.View entering={FadeIn.duration(400)} style={styles.headerTextRow}>
-                <View style={{ flex: 1 }}>
-                  <Text numberOfLines={1} style={styles.headerSubtitle}>{name || 'Selected region'}</Text>
-                  <Text style={styles.headerTitle}>Stations</Text>
-                </View>
+                <Text style={styles.headerText}>
+                  <Text style={styles.headerPrimary}>Browse </Text>
+                  <Text style={styles.headerSecondary}>{titles[type || 'countries']}</Text>
+                </Text>
                 <Pressable onPress={() => setShowSearch(true)} style={styles.searchToggle}>
                   <Feather name="search" size={28} color={palette.ink} />
                 </Pressable>
@@ -139,7 +107,7 @@ export default function StationsScreen() {
                   style={styles.searchField}
                   value={search}
                   onChangeText={setSearch}
-                  placeholder="Search stations..."
+                  placeholder="Search..."
                   placeholderTextColor={palette.softInk}
                 />
                 <Pressable onPress={() => { setShowSearch(false); setSearch(''); }}>
@@ -153,43 +121,49 @@ export default function StationsScreen() {
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator color={palette.ink} size="large" />
-            <Text style={styles.loadingText}>Searching the airwaves...</Text>
+            <Text style={styles.loadingText}>Tuning in...</Text>
           </View>
         ) : (
           <FlatList
             data={filtered}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => item.id + index}
             keyboardShouldPersistTaps="handled"
             style={styles.listScroll}
             contentContainerStyle={styles.listContent}
             initialNumToRender={15}
             ListEmptyComponent={
                <View style={styles.emptyState}>
-                  <Feather name="radio" size={48} color={palette.line} />
-                  <Text style={styles.emptyText}>No stations found for "{search}"</Text>
+                  <Feather name="search" size={48} color={palette.line} />
+                  <Text style={styles.emptyText}>No results found for "{search}"</Text>
                </View>
             }
-            renderItem={({ item: station, index }) => (
-              <StationRow 
-                station={station} 
-                index={index} 
-                onPress={() => {
-                  play(station, filtered);
-                  router.push({
-                    pathname: '/player',
-                    params: {
-                      id: station.id,
-                      name: station.name,
-                      url: station.url,
-                      country: station.country,
-                      lang: station.language,
-                      tags: station.tags,
-                      homepage: station.homepage,
-                      favicon: station.favicon,
+            renderItem={({ item, index }) => (
+              <Animated.View 
+                entering={FadeInDown.duration(400).delay(Math.min(index * 30, 600))}
+              >
+                <Pressable
+                  onPress={() => router.push({
+                    pathname: '/stations',
+                    params: { 
+                      type: type,
+                      id: item.id, 
+                      name: item.name 
                     }
-                  });
-                }}
-              />
+                  })}
+                  style={({ pressed }) => [
+                    styles.row,
+                    pressed && styles.rowPressed
+                  ]}
+                >
+                  <View style={styles.rowInfo}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    <Text style={styles.itemCount}>{item.count.toLocaleString()} stations</Text>
+                  </View>
+                  <View style={styles.rowAction}>
+                     <Feather name="chevron-right" size={20} color={palette.softInk} />
+                  </View>
+                </Pressable>
+              </Animated.View>
             )}
           />
         )}
@@ -240,20 +214,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerSubtitle: {
-    color: palette.softInk,
-    fontSize: 12,
+  headerText: {
+    fontSize: 24,
     fontFamily: typography.bold,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: -1,
   },
-  headerTitle: {
-    color: palette.ink,
-    fontSize: 28,
-    fontFamily: typography.bold,
-    letterSpacing: -1.5,
-    marginTop: -2,
-  },
+  headerPrimary: { color: palette.ink, opacity: 0.4 },
+  headerSecondary: { color: palette.ink },
   searchToggle: {
     padding: 4,
   },
@@ -290,7 +257,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 18,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.03)',
   },
@@ -298,34 +265,24 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     backgroundColor: 'rgba(0,0,0,0.02)',
   },
-  stationIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: palette.app,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
-    overflow: 'hidden',
-  },
-  stationFavicon: {
-    width: '100%',
-    height: '100%',
-  },
   rowInfo: {
     flex: 1,
   },
-  stationName: {
+  itemName: {
     color: palette.ink,
-    fontSize: 24,
+    fontSize: 28,
+    lineHeight: 34,
     fontFamily: typography.bold,
-    letterSpacing: -1,
+    letterSpacing: -1.5,
+    textTransform: 'capitalize',
   },
-  stationMeta: {
+  itemCount: {
     color: palette.softInk,
     fontSize: 13,
-    fontFamily: typography.medium,
-    marginTop: 0,
+    fontFamily: typography.bold,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginTop: 2,
   },
   rowAction: {
     marginLeft: 12,

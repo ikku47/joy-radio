@@ -2,7 +2,7 @@ import { usePlayer } from '@/lib/player-context';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -231,6 +231,11 @@ export function VinylRecord({
   isMini?: boolean
 }) {
   const rotation = useSharedValue(0);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setError(false);
+  }, [uri]);
 
   useEffect(() => {
     if (active) {
@@ -253,11 +258,12 @@ export function VinylRecord({
       <Animated.View style={[vinylStyles.record, animatedStyle]}>
         <View style={vinylStyles.grooves} />
         <View style={[vinylStyles.label, isMini ? vinylStyles.labelMini : null]}>
-          {uri ? (
+          {(uri && !error) ? (
             <Image
               source={{ uri }}
               style={vinylStyles.labelImage}
               contentFit="cover"
+              onError={() => setError(true)}
             />
           ) : (
             <View style={vinylStyles.labelPlaceholder}>
