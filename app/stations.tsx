@@ -1,3 +1,4 @@
+import React, { memo, useCallback } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,8 +15,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { 
-  FadeInDown, 
-  Layout, 
   FadeIn
 } from 'react-native-reanimated';
 
@@ -28,45 +27,43 @@ import {
   type RadioStation 
 } from '@/lib/radio';
 
-function StationRow({ station, index, onPress }: { station: RadioStation, index: number, onPress: () => void }) {
+const ROW_HEIGHT = 74;
+
+const StationRow = memo(({ station, onPress }: { station: RadioStation, onPress: () => void }) => {
   const [error, setError] = useState(false);
 
   return (
-    <Animated.View 
-      entering={FadeInDown.duration(400).delay(Math.min(index * 30, 600))}
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.row,
+        pressed && styles.rowPressed
+      ]}
     >
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [
-          styles.row,
-          pressed && styles.rowPressed
-        ]}
-      >
-        <View style={styles.stationIconBox}>
-          {(station.favicon && !error) ? (
-            <Image 
-              source={{ uri: station.favicon }} 
-              style={styles.stationFavicon} 
-              contentFit="contain" 
-              onError={() => setError(true)}
-            />
-          ) : (
-            <Feather name="radio" size={20} color={palette.softInk} />
-          )}
-        </View>
-        <View style={styles.rowInfo}>
-          <Text numberOfLines={1} style={styles.stationName}>{station.name}</Text>
-          <Text numberOfLines={1} style={styles.stationMeta}>
-            {station.tags ? station.tags.split(',').slice(0, 2).join(' • ') : (station.language || station.country)}
-          </Text>
-        </View>
-        <View style={styles.rowAction}>
-           <Feather name="chevron-right" size={20} color={palette.softInk} />
-        </View>
-      </Pressable>
-    </Animated.View>
+      <View style={styles.stationIconBox}>
+        {(station.favicon && !error) ? (
+          <Image 
+            source={{ uri: station.favicon }} 
+            style={styles.stationFavicon} 
+            contentFit="contain" 
+            onError={() => setError(true)}
+          />
+        ) : (
+          <Feather name="radio" size={20} color={palette.softInk} />
+        )}
+      </View>
+      <View style={styles.rowInfo}>
+        <Text numberOfLines={1} style={styles.stationName}>{station.name}</Text>
+        <Text numberOfLines={1} style={styles.stationMeta}>
+          {station.tags ? station.tags.split(',').slice(0, 2).join(' • ') : (station.language || station.country)}
+        </Text>
+      </View>
+      <View style={styles.rowAction}>
+         <Feather name="chevron-right" size={20} color={palette.softInk} />
+      </View>
+    </Pressable>
   );
-}
+});
 
 export default function StationsScreen() {
   const router = useRouter();
@@ -109,6 +106,33 @@ export default function StationsScreen() {
     const q = search.toLowerCase();
     return stations.filter((s) => s.name.toLowerCase().includes(q));
   }, [stations, search]);
+
+  const handleStationPress = useCallback((station: RadioStation) => {
+    play(station, filtered);
+    router.push({
+      pathname: '/player',
+      params: {
+        id: station.id,
+        name: station.name,
+        url: station.url,
+        country: station.country,
+        lang: station.language,
+        tags: station.tags,
+        homepage: station.homepage,
+        favicon: station.favicon,
+      }
+    });
+  }, [play, router, filtered]);
+
+  const renderItem = useCallback(({ item }: { item: RadioStation }) => (
+    <StationRow station={item} onPress={() => handleStationPress(item)} />
+  ), [handleStationPress]);
+
+  const getItemLayout = useCallback((_: any, index: number) => ({
+    length: ROW_HEIGHT,
+    offset: ROW_HEIGHT * index,
+    index,
+  }), []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -162,35 +186,18 @@ export default function StationsScreen() {
             keyboardShouldPersistTaps="handled"
             style={styles.listScroll}
             contentContainerStyle={styles.listContent}
-            initialNumToRender={15}
+            initialNumToRender={12}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
+            getItemLayout={getItemLayout}
             ListEmptyComponent={
                <View style={styles.emptyState}>
                   <Feather name="radio" size={48} color={palette.line} />
                   <Text style={styles.emptyText}>No stations found for "{search}"</Text>
                </View>
             }
-            renderItem={({ item: station, index }) => (
-              <StationRow 
-                station={station} 
-                index={index} 
-                onPress={() => {
-                  play(station, filtered);
-                  router.push({
-                    pathname: '/player',
-                    params: {
-                      id: station.id,
-                      name: station.name,
-                      url: station.url,
-                      country: station.country,
-                      lang: station.language,
-                      tags: station.tags,
-                      homepage: station.homepage,
-                      favicon: station.favicon,
-                    }
-                  });
-                }}
-              />
-            )}
+            renderItem={renderItem}
           />
         )}
 
@@ -205,7 +212,7 @@ export default function StationsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.app,
+    backgroundColor: palette.shell,
   },
   screen: {
     flex: 1,

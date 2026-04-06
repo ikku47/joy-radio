@@ -1,7 +1,8 @@
+import React from 'react';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback, memo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -10,11 +11,10 @@ import {
   Text,
   TextInput,
   View,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { 
-  FadeInDown, 
-  Layout, 
   FadeIn
 } from 'react-native-reanimated';
 
@@ -23,163 +23,20 @@ import {
   getRadioCountries, 
   getRadioLanguages, 
   getRadioTags, 
-  type RadioCountry, 
-  type RadioLanguage, 
-  type RadioTag 
 } from '@/lib/radio';
 
 type BrowseItem = {
   name: string;
   count: number;
-  id: string; // ISO for country, name for others
+  id: string;
 };
 
-export default function BrowseScreen() {
-  const router = useRouter();
-  const { type } = useLocalSearchParams<{ type: 'countries' | 'languages' | 'tags' }>();
-  const [items, setItems] = useState<BrowseItem[]>([]);
-  const [search, setSearch] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function load() {
-      try {
-        setLoading(true);
-        let data: BrowseItem[] = [];
-        if (type === 'countries') {
-          const res = await getRadioCountries();
-          data = res.map(c => ({ name: c.name, count: c.stationcount, id: c.iso_3166_1 }));
-        } else if (type === 'languages') {
-          const res = await getRadioLanguages();
-          data = res.map(l => ({ name: l.name, count: l.stationcount, id: l.name }));
-        } else if (type === 'tags') {
-          const res = await getRadioTags();
-          data = res.map(t => ({ name: t.name, count: t.stationcount, id: t.name }));
-        }
-        setItems(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, [type]);
-
-  const titles = {
-    countries: 'Country',
-    languages: 'Language',
-    tags: 'Style',
-  };
-
-  const filtered = useMemo(() => {
-    if (!search) return items;
-    const q = search.toLowerCase();
-    return items.filter((item) => item.name.toLowerCase().includes(q));
-  }, [items, search]);
-
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <View style={styles.screen}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-             <View style={styles.iconCircle}>
-                <Feather name="arrow-left" size={24} color={palette.ink} />
-             </View>
-          </Pressable>
-          <View style={styles.headerTitleWrap}>
-            {!showSearch ? (
-              <Animated.View entering={FadeIn.duration(400)} style={styles.headerTextRow}>
-                <Text style={styles.headerText}>
-                  <Text style={styles.headerPrimary}>Browse </Text>
-                  <Text style={styles.headerSecondary}>{titles[type || 'countries']}</Text>
-                </Text>
-                <Pressable onPress={() => setShowSearch(true)} style={styles.searchToggle}>
-                  <Feather name="search" size={28} color={palette.ink} />
-                </Pressable>
-              </Animated.View>
-            ) : (
-              <Animated.View entering={FadeIn.duration(400)} style={styles.searchHeader}>
-                <TextInput
-                  autoFocus
-                  style={styles.searchField}
-                  value={search}
-                  onChangeText={setSearch}
-                  placeholder="Search..."
-                  placeholderTextColor={palette.softInk}
-                />
-                <Pressable onPress={() => { setShowSearch(false); setSearch(''); }}>
-                  <Feather name="x" size={28} color={palette.ink} />
-                </Pressable>
-              </Animated.View>
-            )}
-          </View>
-        </View>
-
-        {loading ? (
-          <View style={styles.center}>
-            <ActivityIndicator color={palette.ink} size="large" />
-            <Text style={styles.loadingText}>Tuning in...</Text>
-          </View>
-        ) : (
-          <FlatList
-            data={filtered}
-            keyExtractor={(item, index) => item.id + index}
-            keyboardShouldPersistTaps="handled"
-            style={styles.listScroll}
-            contentContainerStyle={styles.listContent}
-            initialNumToRender={15}
-            ListEmptyComponent={
-               <View style={styles.emptyState}>
-                  <Feather name="search" size={48} color={palette.line} />
-                  <Text style={styles.emptyText}>No results found for "{search}"</Text>
-               </View>
-            }
-            renderItem={({ item, index }) => (
-              <Animated.View 
-                entering={FadeInDown.duration(400).delay(Math.min(index * 30, 600))}
-              >
-                <Pressable
-                  onPress={() => router.push({
-                    pathname: '/stations',
-                    params: { 
-                      type: type,
-                      id: item.id, 
-                      name: item.name 
-                    }
-                  })}
-                  style={({ pressed }) => [
-                    styles.row,
-                    pressed && styles.rowPressed
-                  ]}
-                >
-                  <View style={styles.rowInfo}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style={styles.itemCount}>{item.count.toLocaleString()} stations</Text>
-                  </View>
-                  <View style={styles.rowAction}>
-                     <Feather name="chevron-right" size={20} color={palette.softInk} />
-                  </View>
-                </Pressable>
-              </Animated.View>
-            )}
-          />
-        )}
-
-        <View style={styles.footer}>
-          <MiniPlayer />
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-}
+const ROW_HEIGHT = 86;
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.app,
+    backgroundColor: palette.shell,
   },
   screen: {
     flex: 1,
@@ -260,6 +117,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.03)',
+    height: ROW_HEIGHT,
   },
   rowPressed: {
     opacity: 0.7,
@@ -303,3 +161,169 @@ const styles = StyleSheet.create({
     backgroundColor: palette.shell,
   },
 });
+
+const BrowseRow = memo(({ 
+  item, 
+  onPress 
+}: { 
+  item: BrowseItem, 
+  onPress: (item: BrowseItem) => void 
+}) => {
+  return (
+    <Pressable
+      onPress={() => onPress(item)}
+      style={({ pressed }) => [
+        styles.row,
+        pressed && styles.rowPressed
+      ]}
+    >
+      <View style={styles.rowInfo}>
+        <Text numberOfLines={1} style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemCount}>{item.count.toLocaleString()} stations</Text>
+      </View>
+      <View style={styles.rowAction}>
+         <Feather name="chevron-right" size={20} color={palette.softInk} />
+      </View>
+    </Pressable>
+  );
+});
+
+export default function BrowseScreen() {
+  const router = useRouter();
+  const { type = 'countries' } = useLocalSearchParams<{ type: 'countries' | 'languages' | 'tags' }>();
+  const [items, setItems] = useState<BrowseItem[]>([]);
+  const [search, setSearch] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        let data: BrowseItem[] = [];
+        if (type === 'countries') {
+          const res = await getRadioCountries();
+          data = res.map(c => ({ name: c.name, count: c.stationcount, id: c.iso_3166_1 }));
+        } else if (type === 'languages') {
+          const res = await getRadioLanguages();
+          data = res.map(l => ({ name: l.name, count: l.stationcount, id: l.name }));
+        } else if (type === 'tags') {
+          const res = await getRadioTags();
+          data = res.map(t => ({ name: t.name, count: t.stationcount, id: t.name }));
+        }
+        setItems(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [type]);
+
+  const titles = {
+    countries: 'Country',
+    languages: 'Language',
+    tags: 'Style',
+  };
+
+  const filtered = useMemo(() => {
+    if (!search) return items;
+    const q = search.toLowerCase();
+    return items.filter((item) => item.name.toLowerCase().includes(q));
+  }, [items, search]);
+
+  const handlePress = useCallback((item: BrowseItem) => {
+    router.push({
+      pathname: '/stations',
+      params: { 
+        type: type,
+        id: item.id, 
+        name: item.name 
+      }
+    });
+  }, [router, type]);
+
+  const renderItem = useCallback(({ item }: { item: BrowseItem }) => (
+    <BrowseRow item={item} onPress={handlePress} />
+  ), [handlePress]);
+
+  const getItemLayout = useCallback((_: any, index: number) => ({
+    length: ROW_HEIGHT,
+    offset: ROW_HEIGHT * index,
+    index,
+  }), []);
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="dark" />
+      <View style={styles.screen}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+             <View style={styles.iconCircle}>
+                <Feather name="arrow-left" size={24} color={palette.ink} />
+             </View>
+          </Pressable>
+          <View style={styles.headerTitleWrap}>
+            {!showSearch ? (
+              <Animated.View entering={FadeIn.duration(400)} style={styles.headerTextRow}>
+                <Text style={styles.headerText}>
+                  <Text style={styles.headerPrimary}>Browse </Text>
+                  <Text style={styles.headerSecondary}>{titles[type || 'countries']}</Text>
+                </Text>
+                <Pressable onPress={() => setShowSearch(true)} style={styles.searchToggle}>
+                  <Feather name="search" size={28} color={palette.ink} />
+                </Pressable>
+              </Animated.View>
+            ) : (
+              <Animated.View entering={FadeIn.duration(400)} style={styles.searchHeader}>
+                <TextInput
+                  autoFocus
+                  style={styles.searchField}
+                  value={search}
+                  onChangeText={setSearch}
+                  placeholder="Search..."
+                  placeholderTextColor={palette.softInk}
+                />
+                <Pressable onPress={() => { setShowSearch(false); setSearch(''); }}>
+                  <Feather name="x" size={28} color={palette.ink} />
+                </Pressable>
+              </Animated.View>
+            )}
+          </View>
+        </View>
+
+        {loading ? (
+          <View style={styles.center}>
+            <ActivityIndicator color={palette.ink} size="large" />
+            <Text style={styles.loadingText}>Tuning in...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.id}
+            keyboardShouldPersistTaps="handled"
+            style={styles.listScroll}
+            contentContainerStyle={styles.listContent}
+            initialNumToRender={12}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
+            getItemLayout={getItemLayout}
+            ListEmptyComponent={
+               <View style={styles.emptyState}>
+                  <Feather name="search" size={48} color={palette.line} />
+                  <Text style={styles.emptyText}>No results found for "{search}"</Text>
+               </View>
+            }
+            renderItem={renderItem}
+          />
+        )}
+
+        <View style={styles.footer}>
+          <MiniPlayer />
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}

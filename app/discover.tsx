@@ -166,7 +166,7 @@ export default function DiscoverScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.app,
+    backgroundColor: palette.shell,
   },
   screen: {
     flex: 1,

@@ -135,12 +135,11 @@ export default function IntroScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: palette.app,
+    backgroundColor: palette.shell,
   },
   screen: {
     flex: 1,
-    backgroundColor: palette.app,
-    padding: 0,
+    backgroundColor: palette.shell,
   },
   panel: {
     flex: 1,
