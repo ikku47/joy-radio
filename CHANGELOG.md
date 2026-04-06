@@ -2,32 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.0] - 2026-04-03
-
-Initial release of Joy Radio.
+## [1.1.0] - 2026-04-06
 
 ### Added
+- **Signal Fault Handling**: Implemented a 10-second connection timeout logic. The player now displays "SIGNAL LOST" and resets the UI if a broadcast fails to reach the device.
+- **Performance Virtualization**: Added `getItemLayout` and memoized row components to the Browse and Stations pages, enabling lightning-fast scrolling through thousands of stations.
+- **Enhanced Visuals**: Added real-time signal telemetry and enhanced live indicators to the Player screen.
 
-- Design-led radio app built with Expo, React Native, and Expo Router
-- Intro screen with custom visual identity and animated radio needle
-- Country discovery screen with live country data and search
-- Station listing screen with live channel data by country
-- Player screen with shared playback state, mini-player, and radio-inspired controls
-- Shared radio UI system for typography, palette, scale, capsules, icon buttons, and player visuals
-- Radio Browser API integration with typed helpers and response formatting
-- Audio playback support using Expo AV
-- Manrope font integration across the app UI
-- Project README with credits, API notes, and legal section
+### Changed
+- **Architecture Migration**: Migrated from the deprecated `expo-av` to the new high-performance `expo-audio` package for all playback tasks.
+- **Modern Layouts**: Replaced deprecated `SafeAreaView` with `react-native-safe-area-context` for better compatibility with modern edge-to-edge displays.
+- **Immersive Theming**: Unified the Safe Area background colors across all screens to create a seamless, premium edge-to-edge experience.
+- **Taxonomy Refinement**: Renamed 'Global Waves' to 'Global Regions' for better navigation clarity.
 
-### Android
+### Fixed
+- **Navigation Errors**: Resolved warnings regarding missing routes by cleaning up the root navigation stack.
+- **Screen Fitting**: Fixed layout issues where the player screen didn't properly fill the vertical space of the display.
 
-- Android native project generated with Expo prebuild
-- App icon, adaptive icon, favicon, and splash image updated to use the project logo
-- Release signing setup added with self-signed keystore support
-- `build:android` script added for local release APK generation
-- Android package configuration aligned to `com.eq.joyradio`
+---
 
-### Notes
-
-- This is the first public project version
-- Radio metadata and stream quality depend on upstream Radio Browser data
+## [1.0.0] - 2026-04-03
+- First stable release of Joy Radio.
+- Integrated Radio Browser API for global discovery.
+- Spotify-style audio discovery interface.
