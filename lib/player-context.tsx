@@ -14,6 +14,7 @@ interface PlayerContextType {
   currentStation: RadioStation | null;
   playing: boolean;
   loading: boolean;
+  error: string | null;
   play: (station: RadioStation, list?: RadioStation[]) => Promise<void>;
   pause: () => Promise<void>;
   resume: () => Promise<void>;
@@ -31,8 +32,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [stationList, setStationList] = useState<RadioStation[]>([]);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const playerRef = useRef<AudioPlayer | null>(null);
   const activeIdRef = useRef<string | null>(null);
+  const timeoutRef = useRef<any>(null);
   
   const staticWaveform = useSharedValue(0);
   const meter = useSharedValue(0);
@@ -52,7 +55,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     const subscription = player.addListener('playbackStatusUpdate', (status) => {
       setPlaying(status.playing);
-      setLoading(!status.isLoaded || status.isBuffering);
+      const isBuffering = !status.isLoaded || status.isBuffering;
+      setLoading(isBuffering);
+
+      if (status.playing) {
+        setError(null);
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+      }
     });
 
     // Highly chaotic noise waveform simulation
@@ -74,6 +86,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       player.clearLockScreenControls();
       player.remove();
       playerRef.current = null;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
@@ -111,6 +124,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setCurrentStation(station);
     setLoading(true);
     setPlaying(false);
+    setError(null);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(() => {
+      setLoading(currLoading => {
+        if (currLoading) {
+          setError('TIMEOUT');
+          // Important: we don't automatically pause here because standard behavior 
+          // might still want to try, but for UX 'TIMEOUT' is a good state to show.
+          return false;
+        }
+        return currLoading;
+      });
+    }, 10000);
 
     player.replace({ uri: station.url });
     player.setActiveForLockScreen(
@@ -187,6 +217,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       currentStation, 
       playing, 
       loading, 
+      error,
       play, 
       pause, 
       resume, 

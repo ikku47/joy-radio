@@ -46,7 +46,7 @@ function SignalBar({ index, active, meter }: { index: number, active: boolean, m
 
 export default function PlayerScreen() {
   const router = useRouter();
-  const { currentStation, playing, loading, toggle, next, previous, meter } = usePlayer();
+  const { currentStation, playing, loading, error, toggle, next, previous, meter } = usePlayer();
   const params = useLocalSearchParams<{
     id: string,
     name: string,
@@ -82,14 +82,14 @@ export default function PlayerScreen() {
           </Pressable>
           <Capsule label={station.country || 'Global'} />
           <View style={styles.liveIndicator}>
-            <View style={[styles.liveDot, playing && styles.liveDotActive]} />
+            <View style={[styles.liveDot, playing && !error && styles.liveDotActive]} />
             <Text style={styles.liveText}>LIVE</Text>
           </View>
         </View>
 
         <View style={styles.main}>
           <Animated.View entering={FadeInDown.duration(600)} style={styles.vinylContainer}>
-            <VinylRecord uri={station.favicon} active={playing} size={width * 0.7} />
+            <VinylRecord uri={station.favicon} active={playing && !error} size={width * 0.7} />
           </Animated.View>
 
           <View style={styles.metaContainer}>
@@ -137,13 +137,13 @@ export default function PlayerScreen() {
           <View style={styles.signalMeter}>
             <View style={styles.meterInfo}>
               <Text style={styles.meterLabel}>SIGNAL</Text>
-              <Text style={styles.meterValue}>
-                {loading ? 'TUNING...' : ((station as any).bitrate ? `${(station as any).bitrate} KBPS` : (playing ? 'STRONG' : 'IDLE'))}
+              <Text style={[styles.meterValue, error && { color: palette.accent }]}>
+                {error ? 'SIGNAL LOST' : (loading ? 'TUNING...' : ((station as any).bitrate ? `${(station as any).bitrate} KBPS` : (playing ? 'STRONG' : 'IDLE')))}
               </Text>
             </View>
             <View style={styles.meterBars}>
               {[0, 1, 2, 3, 4].map(b => (
-                <SignalBar key={b} index={b} active={playing && !loading} meter={meter} />
+                <SignalBar key={b} index={b} active={playing && !loading && !error} meter={meter} />
               ))}
             </View>
           </View>
