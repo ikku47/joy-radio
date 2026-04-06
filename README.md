@@ -4,16 +4,16 @@
   <img src="./assets/logo.png" alt="Joy Radio logo" width="160" />
 </p>
 
-Joy Radio is a design-forward online radio app built with Expo and React Native. It combines a minimal editorial-style interface with live station discovery, country browsing, and an in-app player experience.
+Joy Radio is a design-forward, open-source online radio app built with Expo and React Native. It combines a minimal editorial-style interface with live station discovery, country browsing, and a high-performance in-app player experience.
 
 ## Highlights
 
-- Full-screen mobile radio experience with custom intro, discovery, browsing, stations, and player screens
-- Live radio discovery powered by the Radio Browser directory
-- Browse by Country, Language, or Music Style (Tags)
-- Searchable browsing and station flows
-- Shared audio player context for playback and mini-player state
-- Custom typography and motion built around the app's visual system
+- **Design-Centric UI**: Minimal, high-contrast, and editorial-inspired interface.
+- **Global Discovery**: Powered by the Radio Browser directory.
+- **Smart Connection**: Auto-timeout and signal status feedback for dead links.
+- **High-Performance**: List virtualization for scrolling through thousands of stations without lag.
+- **Modern Architecture**: Built with the latest Expo Audio and Reanimated APIs.
+- **Shared Context**: Global player state management and mini-player support.
 
 ## Tech Stack
 
@@ -22,93 +22,50 @@ Joy Radio is a design-forward online radio app built with Expo and React Native.
 ![Expo Router](https://img.shields.io/badge/Expo%20Router-1C1E24?style=for-the-badge&logo=expo&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Reanimated](https://img.shields.io/badge/Reanimated-101418?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Expo AV](https://img.shields.io/badge/Expo%20AV-111827?style=for-the-badge&logo=expo&logoColor=white)
+![Expo Audio](https://img.shields.io/badge/Expo%20Audio-111827?style=for-the-badge&logo=expo&logoColor=white)
 
 ## API
 
-This app uses the [Radio Browser API](https://www.radio-browser.info/).
+This app uses the [Radio Browser API](https://www.radio-browser.info/). Reach out to their community to support the open directory.
 
 Current base endpoint:
-
 ```txt
 https://de1.api.radio-browser.info/json
 ```
 
-Primary data used by the app includes:
-
-- `/countries`
-- `/languages`
-- `/tags`
-- `/stations`
-- `/stations/bycountrycodeexact/:code`
-- `/stations/bylanguage/:language`
-- `/stations/bytag/:tag`
-
-## Project Structure
-
-```txt
-app/
-  index.tsx        Intro screen
-  discover.tsx     Discovery mode selector (Country, Language, Style)
-  browse.tsx       Dynamic listing (Countries, Languages, or Styles)
-  stations.tsx     Station listing and search
-  player.tsx       Playback screen
-
-components/
-  radio-ui.tsx     Shared visual system and radio UI primitives
-
-lib/
-  radio.ts         Radio Browser API helpers
-  player-context.tsx
-```
-
 ## Getting Started
 
-1. Install dependencies
-
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Start the Expo dev server
-
-```bash
-npx expo start
-```
-
-3. Run the app in your preferred environment
-
-- iOS simulator
-- Android emulator
-- Expo Go
-- Web
-
-## Scripts
-
+2. Start the development server:
 ```bash
 npm run start
-npm run ios
-npm run android
-npm run web
-npm run lint
 ```
+
+## 🤝 Contributing
+
+We welcome contributions! Whether it's adding new design tokens, fixing bugs, or improving performance.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## Design Credits
 
 Visual direction for this project was inspired by [Tamarashvili](https://dribbble.com/Tamarashvili) and the Dribbble shot [UI Exploration. Online Radio](https://dribbble.com/shots/24479926-UI-Exploration-Online-Radio).
 
-Thanks for the original exploration and inspiration behind the interface direction.
+## License
 
-## Legal
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Legal Disclaimer
 
 - This project is an independent implementation and is not affiliated with or endorsed by Dribbble, Tamarashvili, or Radio Browser.
-- Station names, stream URLs, logos, and metadata are provided by third-party radio directory data sources through Radio Browser.
 - All trademarks, station brands, logos, and media rights belong to their respective owners.
 - This repository is intended for educational, experimental, and product-development purposes.
-- If you use this project commercially, review the licenses and terms of all third-party APIs, assets, fonts, and dependencies you rely on.
-
-## Notes
-
-- Radio availability and metadata quality depend on upstream Radio Browser data.
-- Some streams may be unavailable, geo-restricted, slow, or incorrectly tagged.
-- Playback behavior can vary by device, platform, and stream format.
+- Radio availability and quality depend on upstream data sources.
