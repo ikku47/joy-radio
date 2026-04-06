@@ -15,6 +15,16 @@ Joy Radio is a design-forward, open-source online radio app built with Expo and 
 - **Modern Architecture**: Built with the latest Expo Audio and Reanimated APIs.
 - **Shared Context**: Global player state management and mini-player support.
 
+## Interface
+
+<p align="center">
+  <img src="./screenshots/screen1.jpg" width="19%" />
+  <img src="./screenshots/screen2.jpg" width="19%" />
+  <img src="./screenshots/screen3.jpg" width="19%" />
+  <img src="./screenshots/screen4.jpg" width="19%" />
+  <img src="./screenshots/screen5.jpg" width="19%" />
+</p>
+
 ## Tech Stack
 
 ![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
