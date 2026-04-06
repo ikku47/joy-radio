@@ -4,7 +4,7 @@
   <img src="./assets/logo.png" alt="Joy Radio logo" width="160" />
 </p>
 
-Joy Radio is a design-forward, open-source online radio app built with Expo and React Native. It combines a minimal editorial-style interface with live station discovery, country browsing, and a high-performance in-app player experience.
+Joy Radio is a design-forward, open-source online radio app built with Expo and React Native. The visual direction for this project was inspired by **Tamarashvili** and the Dribbble shot [UI Exploration. Online Radio](https://dribbble.com/shots/24479926-UI-Exploration-Online-Radio). It combines a minimal editorial-style interface with live station discovery, country browsing, and a high-performance in-app player experience.
 
 ## Highlights
 
