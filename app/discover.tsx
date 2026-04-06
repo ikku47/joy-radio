@@ -4,12 +4,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
 import {
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { 
   FadeInDown, 
   FadeInRight,
@@ -78,7 +78,7 @@ export default function DiscoverScreen() {
               })}
             >
               <View style={styles.heroContent}>
-                <Text style={styles.heroLabel}>Global Waves</Text>
+                <Text style={styles.heroLabel}>Global Regions</Text>
                 <Text style={styles.heroSublabel}>Browse every country</Text>
                 <View style={styles.heroBadge}>
                   <Text style={styles.heroBadgeText}>200+ REGIONS</Text>

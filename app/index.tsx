@@ -3,12 +3,12 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState, useRef } from 'react';
 import {
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import { Audio } from 'expo-av';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { createAudioPlayer, type AudioPlayer } from 'expo-audio';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -32,7 +32,7 @@ export default function IntroScreen() {
   const router = useRouter();
   const rotation = useSharedValue(0);
   const [activeIndex, setActiveIndex] = useState(0);
-  const staticRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<AudioPlayer | null>(null);
 
   useEffect(() => {
     rotation.value = withRepeat(
@@ -46,29 +46,27 @@ export default function IntroScreen() {
     }, 2800);
 
     // Play static audio and navigate when done
-    async function setupStatic() {
-      try {
-        const { sound } = await Audio.Sound.createAsync(
-          require('../assets/sounds/fm-static.mp3'),
-          { shouldPlay: true, isLooping: false, volume: 0.15 }
-        );
-        staticRef.current = sound;
-        
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            router.replace('/discover');
-          }
-        });
-      } catch (e) {
-        console.warn('Static intro failed', e);
-      }
+    try {
+      const player = createAudioPlayer(require('../assets/sounds/fm-static.mp3'));
+      playerRef.current = player;
+      
+      const sub = player.addListener('playbackStatusUpdate', (status) => {
+        if (status.didJustFinish) {
+          router.replace('/discover');
+        }
+      });
+      
+      player.play();
+      
+      return () => {
+        clearInterval(interval);
+        sub.remove();
+        player.remove();
+      };
+    } catch (e) {
+      console.warn('Static intro failed', e);
+      return () => clearInterval(interval);
     }
-    setupStatic();
-
-    return () => {
-      clearInterval(interval);
-      staticRef.current?.unloadAsync();
-    };
   }, []);
 
   const animatedKnobStyle = useAnimatedStyle(() => ({

@@ -5,7 +5,8 @@ import Animated, {
   withRepeat, 
   withTiming, 
   withSequence,
-  Easing 
+  Easing,
+  type SharedValue
 } from 'react-native-reanimated';
 import { type RadioStation } from './radio';
 
@@ -19,8 +20,8 @@ interface PlayerContextType {
   toggle: () => Promise<void>;
   next: () => Promise<void>;
   previous: () => Promise<void>;
-  staticWaveform: { value: number };
-  meter: { value: number };
+  staticWaveform: SharedValue<number>;
+  meter: SharedValue<number>;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);

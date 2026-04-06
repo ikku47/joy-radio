@@ -36,7 +36,8 @@ export default function RootLayout() {
       <PlayerProvider>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
-          <Stack.Screen name="countries" />
+          <Stack.Screen name="discover" />
+          <Stack.Screen name="browse" />
           <Stack.Screen name="stations" />
           <Stack.Screen name="player" />
         </Stack>
